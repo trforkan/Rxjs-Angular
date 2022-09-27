@@ -1,19 +1,62 @@
-import { Component, OnInit } from '@angular/core';
-import { concat, interval, map, merge, take } from 'rxjs';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { concat, forkJoin, from, fromEvent, interval, map, merge, take, zip } from 'rxjs';
 
 @Component({
   selector: 'app-promise',
   templateUrl: './promise.component.html',
   styleUrls: ['./promise.component.scss']
 })
-export class PromiseComponent implements OnInit {
+export class PromiseComponent implements OnInit , AfterViewInit{
 
   concatSource: any;
   mergeSource: any;
 
+  @ViewChild('inputVal') text?: ElementRef;
+  @ViewChild('inputVal1') text1?: ElementRef;
+
   constructor() { }
 
+  ngAfterViewInit(): void {
+    //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
+    //Add 'implements AfterViewInit' to the class.
+
+    const inputText1 = fromEvent<any>(this.text1?.nativeElement, 'keyup').pipe(
+      map(res=> res.target.value),
+      take(6)
+    );
+
+    const inputText = fromEvent<any>(this.text?.nativeElement, 'keyup').pipe(
+      map(res=> res.target.value),
+      take(5)
+    );
+
+    // inputText.subscribe(res => {
+    //   console.log(res);
+    // })
+    // console.log(inputText);
+
+    zip(inputText, inputText1).subscribe(([txt1,txt2])=>{
+      console.log("zip = ",txt1," ",txt2);
+    });
+
+    forkJoin(inputText, inputText1).subscribe(([txt1,txt2])=>{
+      console.log("forkjoin =",txt1," ",txt2);
+    });
+  }
+
   ngOnInit(): void {
+
+    const ara = from([1,2,3,4,5,6,7,8,9]);
+
+    ara.subscribe(res=>{
+      // console.log(res);
+    });
+
+    const val = ara.subscribe(res=>{
+      map(res => res);
+    })
+
+    console.log(val)
 
 
     const source1 = interval(1000).pipe(
@@ -96,6 +139,7 @@ export class PromiseComponent implements OnInit {
       console.log(res);
     })
   }
+
 
 
 
